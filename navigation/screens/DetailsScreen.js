@@ -1,118 +1,120 @@
-import React, { Component  } from 'react'; // Importa o React e o React components
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'; // Importa os componentes do react native
+// 7 Type of Graph using React Native Chart Kit
+// https://aboutreact.com/react-native-chart-kit/
 
-import init from 'react_native_mqtt'; // Importa a biblioteca React Native MQTT 
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Importa a biblioteca do AsyncStore que e Necessaria para usar o MQTT
+// import React in our code
+import React from 'react';
 
-init({ 
-  size: 10000,
-  storageBackend: AsyncStorage,
-  defaultExpires: 1000 * 3600 * 24,
-  enableCache: true,
-  reconnect: true,
-  sync : {}
-}); 
+// import all the components we are going to use
+import {
+  SafeAreaView,
+  Text,
+  View,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+} from 'react-native';
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  ProgressChart,
+  ContributionGraph,
+  StackedBarChart,
+} from 'react-native-chart-kit';
+//import React Native chart Kit for different kind of Chart
+import  { Component } from 'react';
 
-var x=""; 
-var Ledoff = "OFF";
-var Ledon = "ON";
-var EstadoLed = false; 
+import axios from 'axios'
 
-function onConnect() { 
-  console.log("connection");
-  client.subscribe("Topic User"); 
-}
 
-function onConnectionLost(responseObject) { 
-  if (responseObject.errorCode !== 0) { 
-    console.log("disconnect"+responseObject.errorMessage); 
-  }
-}
-var idclient=Math.random().toString(36).substring(2,7)
- var client = new Paho.MQTT.Client('broker.emqx.io', 8083, idclient); 
-
- client.onConnectionLost = onConnectionLost; 
- client.connect({ onSuccess:onConnect, useSSL: false, userName: "Minh", password:"123456" });
-
-class App extends Component { 
-  constructor(props) { 
-    super(props); 
-    this.state={ 
-      data: "Ola", 
-      TitleText: "OFF",  
-      ButtonText: "ON",  
+export default class DetailsScreen extends Component {
+  constructor(){
+    super();
+    this.state = {
+      chartData:{}
     }
   }
-  componentDidMount() { 
-    client.onMessageArrived=(message)=>this.onMessageArrived(message); 
+
+  componentDidMount() {
+    this.getChartData();
   }
 
-  onMessageArrived  = (message) => 
-  {
-    let x = "\nTopic : "+message.topic+"\nMessage : "+message.payloadString; 
-    console.log(x); 
-    this.setState({data:x}); 
-  }
-  
-  click  = () => 
-  {
+  getChartData() {
+ 
+try {
+  axios.get("http://localhost:8080/api/powerdevice/month/1").then(res => {
+    const coin = res.data;
+    //let labels = [];
+    let thisdata = [];
+    coin.forEach(element => {
+ //   labels.push(element.labels);
+    thisdata.push(element);
 
-  
-   // client.publish("data","0");
-    EstadoLed = !EstadoLed; 
-    if (EstadoLed == false){ 
-      this.setState({TitleText:Ledoff}) 
-      this.setState({ButtonText:Ledon}) 
-      var temp={msg:"0"}
-     
-    }
-    else { 
-      this.setState({TitleText:Ledon}) 
-      this.setState({ButtonText:Ledoff}) 
-      var temp={msg:"1"}
-    }
-    client.publish("ledclient", JSON.stringify(temp));
-  }
-  
-  
-  render() { 
-    return (
-      <View style={styles.container}> 
-          <View>
-            <Text style={styles.title}>LED {this.state.TitleText}</Text>
-          </View>
-          <TouchableOpacity onPress={()=>this.click()}>
-            <Text style={styles.Button}>{this.state.ButtonText}</Text>
-          </TouchableOpacity>   
-      </View>
-    );
-  }
+      });
+
+   console.log(coin)
+    this.setState({
+      chartData: {
+        
+          labels: ['January', 'February', 'March', 'April','May','June','July','August','November','October','September','December'],
+          datasets: [
+            {
+              data: thisdata,
+            },
+          ],
+        }
+    });
+  });
+} catch (error) {
+  console.log(error);
 }
+    }
 
-export default App; 
+  render(){
 
-const styles = StyleSheet.create({ 
+        return (
+          <>
+          <Text style={styles.header}>Bezier Line Chart</Text>
+          {Object.keys(this.state.chartData).length >0 ?
+          <LineChart
+            data={this.state.chartData}
+            width={Dimensions.get('window').width - 16} // from react-native
+            height={220}
+            yAxisLabel={'Rs'}
+            chartConfig={{
+              backgroundColor: '#1cc910',
+              backgroundGradientFrom: '#eff3ff',
+              backgroundGradientTo: '#efefef',
+              decimalPlaces: 2, // optional, defaults to 2dp
+              color: (opacity = 255) => `rgba(0, 0, 0, ${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+            }}
+            bezier
+            style={{
+              marginVertical: 8,
+              borderRadius: 16,
+            }}
+          /> : null}
+        </>
+        );
+
+    }     
+}
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#666666',
-    alignItems: 'center',
+    backgroundColor: 'white',
     justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    padding: 10,
   },
-  title: {
-    fontFamily: "normal",
-    fontSize: 20,
-    fontWeight: "bold",
-    color:"#FFFFFF", 
-    textAlign: 'center'
+  header: {
+    textAlign: 'center',
+    fontSize: 18,
+    padding: 16,
+    marginTop: 16,
   },
-  Button: {
-    margin: 20,
-    padding:15,
-    width: 80,
-    fontFamily: "normal",
-    backgroundColor: "#000dff",
-    borderRadius:10, 
-    color:"#FFFFFF", 
-    textAlign: 'center'
-  }
 });

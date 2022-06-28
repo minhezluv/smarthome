@@ -10,6 +10,6 @@
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#666666"
-    },
+    }
   }
 }
