@@ -42,7 +42,7 @@ export default class DetailsScreen extends Component {
   getChartData() {
  
 try {
-  axios.get("http://localhost:8080/api/powerdevice/month/1").then(res => {
+  axios.get("http://192.168.0.101:8080/api/powerdevice/month/1").then(res => {
     const coin = res.data;
     //let labels = [];
     let thisdata = [];

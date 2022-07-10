@@ -2,7 +2,7 @@ module.exports = app => {
   const powerdevice = require("../controllers/powerdevice.controller.js");
 
   var router = require("express").Router();
-
+console.log(router);
   // Create a new Tutorial
  // router.post("/", powerdevice.create);
    // Retrieve a single Tutorial with id

@@ -47,7 +47,7 @@ if (program.protocol && PROTOCOLS.indexOf(program.protocol) === -1) {
   OPTIONS['ca'] = fs.readFileSync('./broker.emqx.io-ca.crt')
 } else {}
 
-const topic = 'data'
+const topic = 'data/1'
 
 const client = mqtt.connect(connectUrl, OPTIONS)
 
@@ -67,22 +67,33 @@ client.on('error', (error) => {
 })
 
 client.on('message', (topic, payload) => {
-  console.log('Received Message:', topic,payload.toString());
-  const message = JSON.parse(payload.toString())
+  try {
+    console.log('Received Message:', topic,payload.toString());
+    const message = JSON.parse(payload.toString())
+  
+   console.log(parseInt(message.deviceid));
+   if(parseInt(message.deviceid)>0){
+    console.log("hi");
+    let tempdate=(message.date)*1000;
 
- console.log(parseInt(message.deviceid));
- if(parseInt(message.deviceid)>0){
-  console.log("hi");
-  let time=new Date(message.date.toString());
-  let power=message.power.toString();
-  let customerdeviceid=message.deviceid.toString();
-  let data=[power,customerdeviceid,message.date.toString()];
-  sql.insertData(data);
-  console.log('success');
- }
+    let time=new Date(tempdate).toISOString().slice(0, 19).replace('T', ' ');
+    console.log(time);
+    let power=message.power;
+    let customerdeviceid=message.deviceid.toString();
+    if(power>0){
+      let data=[power,customerdeviceid,time];
+      sql.insertData(data);
+      console.log('success');
+    }
+  
+   } 
+  } catch (error) {
+    console.log(error);
+  }
+
 })
 var corsOptions = {
-  origin: "http://localhost:8080",
+  origin: "http://192.168.0.101:8081",
   optionsSuccessStatus: 200
 };
 
@@ -103,6 +114,8 @@ require("./routes/powerdevice.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+const HOST=process.env.HOST || "192.168.0.101";
+app.listen(PORT,HOST, () => {
+  console.log(`Server is running on HOST ${HOST}.`);
+//  console.log(`Server is running on server ${app.address().address}.`);
 });

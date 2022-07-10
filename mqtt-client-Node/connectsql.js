@@ -9,19 +9,24 @@ var con=mysql.createConnection({
   database:"smarthome"
 });
 async function insertData(datapower) {
-        //con.connect(function(err) {
-           // if (err) throw err;
-            console.log("Connected!");
-            console.log(datapower);
-            var sql = "INSERT INTO powerdevice (Data,CustomerDeviceID,Date) VALUES ?";
-            var values =[datapower] ;
+  try {
+            
+           console.log("Connected!");
+           console.log(datapower);
+           var sql = "INSERT INTO powerdevice (Data,CustomerDeviceID,Date) VALUES ?";
+           var values =[datapower] ;
+           try {
             con.query(sql, [values], function (err, result) {
-              if (err) throw err;
               console.log("Number of records inserted: " + result.affectedRows);
             });
-         // });
+           } catch (error) {
+            console.log(error);
+           }
+       
+  } catch (error) {
+    console.log(error);
+  }
 
-       // con.end(); 
     
 }
 

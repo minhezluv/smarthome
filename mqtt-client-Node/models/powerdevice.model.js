@@ -9,16 +9,21 @@ const powerdevice = function(powerdevice) {
   };
 
   powerdevice.create = (newpowerdevice, result) => {
-    sql.query("INSERT INTO powerdevice SET ?", newpowerdevice, (err, res) => {
-      if (err) {
-        console.log("error: ", err);
-        result(err, null);
-        return;
-      }
-  
-      console.log("created powerdevice: ", { id: res.insertId, ...newpowerdevice });
-      result(null, { id: res.insertId, ...newpowerdevice });
-    });
+    try {
+      sql.query("INSERT INTO powerdevice SET ?", newpowerdevice, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          result(err, null);
+          return;
+        }
+    
+        console.log("created powerdevice: ", { id: res.insertId, ...newpowerdevice });
+        result(null, { id: res.insertId, ...newpowerdevice });
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
   };
 
   powerdevice.getAll = (CustomerDeviceID, result) => {

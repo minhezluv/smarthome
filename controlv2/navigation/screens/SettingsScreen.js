@@ -17,7 +17,7 @@ var x=""; // Criar a variavel x Como uma String
 var Ledoff = "OFF"; // Criar a variavel Ledoff Como uma String
 var Ledon = "ON"; // Criar a variavel Ledon Como uma String
 var EstadoLed = false; // Criar a variavel EstadoLed Como um Bollean
-var state="1";
+var state="0";
 function onConnect() { // Criar a funcao que Mostrara quando a conexão e feita
   console.log("Conectado"); // Mostra no Console o texto Conectado
   client.subscribe("state"); // Se increve no topico
@@ -41,7 +41,7 @@ var idclient=Math.random().toString(36).substring(2,7)
       data: "Ola", 
       TitleText: "ON",  
       ButtonText: "OFF",  
-      DeviceState:"Thiết bị điện đã hoạt động"
+      DeviceState:"Chưa xác định"
     }
   }
   componentDidMount() { 
@@ -53,7 +53,7 @@ var idclient=Math.random().toString(36).substring(2,7)
     let x = message.payloadString; 
     let y =JSON.parse(x);
     x=y["state"];
-    let z=y["devicestate"]
+    let z=y["devicestate"];
     if(state!=x){
       if(x==1){
         this.setState({
@@ -72,6 +72,7 @@ var idclient=Math.random().toString(36).substring(2,7)
         
       }
       state=x;
+    //  EstadoLed = !EstadoLed; 
     }
     if(z==1){
       this.setState({
@@ -88,20 +89,18 @@ var idclient=Math.random().toString(36).substring(2,7)
   
   click  = () => 
   {
-
-  
-   // client.publish("data","0");
     EstadoLed = !EstadoLed; 
     if (EstadoLed == false){ 
       this.setState({TitleText:Ledoff}) 
       this.setState({ButtonText:Ledon}) 
       var temp={msg:"0"}
-     
+      this.state=1;
     }
     else { 
       this.setState({TitleText:Ledon}) 
       this.setState({ButtonText:Ledoff}) 
       var temp={msg:"1"}
+      this.state=0;
     }
     client.publish("ledclient", JSON.stringify(temp));
   }
@@ -111,7 +110,7 @@ var idclient=Math.random().toString(36).substring(2,7)
     return (
       <View style={styles.container}> 
           <View>
-            <Text style={styles.title}>LED {this.state.TitleText}</Text>
+            <Text style={styles.title}>Plug {this.state.TitleText}</Text>
           </View>
           <TouchableOpacity onPress={()=>this.click()}>
             <Text style={styles.Button}>{this.state.ButtonText}</Text>
